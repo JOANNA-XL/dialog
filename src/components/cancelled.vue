@@ -4,21 +4,45 @@
       <div><span>已取消</span><span></span></div>
     </div>
     <div class="event-box" style="height: auto; display: block;">
-      <ul v-for="(item,index) in attr1" :key="index">
+      <ul v-for="(item,index) in cancelled" :key="index">
         <li class="event-list">
-          <input type="checkbox"> 
-          <div style="float:left">{{item}}</div> 
-          <button class="cancel-btn">取消</button>
+          <div style="float:left;text-decoration:line-through">{{item}}</div>
+          <button class="cancel-btn" @click="reset(index)">恢复</button>
         </li>
       </ul>
-    </div> 
+    </div>
   </div>
 </template>
 <script>
 export default {
+  props:['update'],
   data(){
     return {
-      attr1:['d','x']
+      cancelled:[],
+      undone:[]
+    }
+  },
+  beforeUpdate:function(){
+    console.log(this.update);
+    this.update == 'cancel'?this.cancelled = JSON.parse(localStorage.getItem('cancelled')):'';
+  },
+  mounted:function(){
+    this.cancelled = JSON.parse(localStorage.getItem('cancelled'));
+  },
+  methods:{
+    // 点击取消改变localstorage的内容
+    reset(index){
+      this.update = 'input';
+      if(localStorage.getItem('undone')){
+        this.undone.push(this.cancelled[index]);
+        this.undone = this.undone.concat(JSON.parse(localStorage.getItem('undone')));
+        localStorage.setItem('undone',JSON.stringify(this.undone));
+      } else {
+        localStorage.setItem('undone',JSON.stringify(this.cancelled[index]));
+      }
+      this.cancelled.splice(index,1);
+      localStorage.setItem('cancelled',JSON.stringify(this.cancelled));
+      // location.href = "http://localhost:8082";
     }
   }
 }
@@ -38,7 +62,7 @@ export default {
   }
   .event-box> ul {
     border: 1px solid #ccc;
-    padding-left: 30px;
+    padding-left: 10px;
     padding-right: 10px;
     margin: 0 20px;
     overflow: hidden;
@@ -47,13 +71,6 @@ export default {
     height: 40px;
     line-height: 40px;
     position: relative;
-  }
-  .event-box>ul>li>input{
-    width: 15px;
-    height: 15px;
-    position: absolute;
-    top: 13px;
-    left: -20px;
   }
   .cancel-btn{
     float: right;

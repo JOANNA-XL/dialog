@@ -6,9 +6,9 @@
     <div class="event-box" style="height: auto; display: block;">
       <ul v-for="(item,index) in completed" :key="index">
         <li class="event-list">
-          <input type="checkbox" checked>
+          <input type="checkbox" checked @click="select(index)">
           <div style="float:left">{{item.name}}</div>
-          <span class="cancel-btn">{{item.time | formatDate}}</span>
+          <span class="cancel-btn">{{item.time}}</span>
         </li>
       </ul>
     </div>
@@ -16,23 +16,33 @@
 </template>
 <script>
 export default {
+  props:['update'],
   data(){
     return {
-      completed:JSON.parse(localStorage.getItem('completed'))
+      completed:[],
+      undone:[]
     }
   },
-  created(){
-    console.log(JSON.parse(localStorage.getItem('completed')))
+  beforeUpdate:function(){
+    console.log(this.update);
+    this.update == 'done'?this.completed = JSON.parse(localStorage.getItem('completed')):'';
+  },
+  mounted:function(){
+    this.completed = JSON.parse(localStorage.getItem('completed'))
   },
   methods:{
-
-  },
-  filters:{
-    formatDate(time){
-      var year = time.getFullYear();
-			var month = time.getMonth() + 1 < 10 ? "0" + (time.getMonth() + 1) : time.getMonth() + 1;
-			var date = time.getDate() < 10 ? "0" + time.getDate() : time.getDate();
-			return year + "-" + month + "-" + date;
+    select(index){
+       this.update = 'undone';
+      if(localStorage.getItem('undone')){
+      this.undone.push(this.completed[index].name);
+      this.undone = this.undone.concat(JSON.parse(localStorage.getItem('undone')));
+      localStorage.setItem('undone',JSON.stringify(this.undone));
+      } else {
+        localStorage.setItem('undone',JSON.stringify(this.completed[index].name));
+      }
+      this.completed.splice(index,1);
+      localStorage.setItem('completed',JSON.stringify(this.completed));
+      // location.href = "http://localhost:8082"
     }
   }
 }

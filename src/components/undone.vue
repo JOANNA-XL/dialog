@@ -1,12 +1,12 @@
 <template>
   <div class="unDone">
     <div class="undone">
-       <div><span>未完成</span><span class="mui-icon mui-icon-arrowdown"></span></div>
+       <div><span>未完成{{update}}</span><span class="mui-icon mui-icon-arrowdown"></span></div>
     </div>
     <div class="event-box" style="height: auto; display: block;">
       <ul v-for="(item,index) in undone" :key="index">
         <li class="event-list">
-          <input type="checkbox" @click="selected(index)" :key="index">
+          <input type="checkbox" @click="selected(index)" :checked="boole">
           <div style="float:left">{{item}}</div>
           <button class="cancel-btn" @click="cancel(index)">取消</button>
         </li>
@@ -16,27 +16,68 @@
 </template>
 <script>
 export default {
+  props:['update'],
   data(){
     return {
-      undone:JSON.parse(localStorage.getItem('undone')),
-      completed:[]
+      undone: [],
+      completed:[],
+      boole: false,
+      cancelled:[]
     }
+  },
+  beforeUpdate:function(){
+    console.log(this.update);
+    this.update == 'inputed'?this.undone = JSON.parse(localStorage.getItem('undone')):'';
+  },
+  mounted:function(){
+    this.undone = JSON.parse(localStorage.getItem('undone'))
   },
   methods:{
     selected(index){
+      this.update = 'done';
       var obj = {}
       obj.name = this.undone[index];
-      obj.time = new Date();
+      var time = new Date();
+      var year = time.getFullYear();
+			var month = time.getMonth() + 1 < 10 ? "0" + (time.getMonth() + 1) : time.getMonth() + 1;
+			var date = time.getDate() < 10 ? "0" + time.getDate() : time.getDate();
+      obj.time = year + "-" + month + "-" + date;
       this.completed.push(obj);
-      if(localStorage.getItem('completed')){
-        this.completed = this.completed.concat(JSON.parse(localStorage.getItem('undone')))
-        localStorage.setItem('completed',JSON.stringify(this.completed));
+      if(this.getData()){
+        this.completed = this.completed.concat(JSON.parse(localStorage.getItem('completed')))
+       this.setData();
       } else {
         localStorage.setItem('completed',JSON.stringify(this.completed));
       }
       this.undone.splice(index,1);
       localStorage.setItem('undone',JSON.stringify(this.undone));
-      console.log(this.undone);
+      // location.href = "http://localhost:8082"
+    },
+    cancel(index){
+      this.update = 'cancel';
+      if(localStorage.getItem('cancelled')){
+
+
+        this.cancelled.push(this.undone[index]);
+
+
+
+
+        this.cancelled = this.cancelled.concat(JSON.parse(localStorage.getItem('cancelled')));
+
+
+
+        localStorage.setItem('cancelled',JSON.stringify(this.cancelled));
+      } else {
+        localStorage.setItem('cancelled',JSON.stringify(this.undone[index]));
+      }
+
+
+      this.undone.splice(index,1);
+
+
+      localStorage.setItem('undone',JSON.stringify(this.undone));
+      // location.href = "http://localhost:8082"
     }
   },
 }
