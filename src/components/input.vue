@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="input">
-      <input v-model="event" type="text" placeholder="待办事项">
+      <input v-model="event" type="text" placeholder="待办事项">1223345566
       <input type="button" @click="getValue" value="提交">
     </div>
     <app-undone :update="update"></app-undone>
